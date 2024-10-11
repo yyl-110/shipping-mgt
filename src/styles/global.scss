@@ -1,0 +1,126 @@
+:root {
+  --error-color-suppl: #de576dff;
+  --error-color-pressed: #ab1f3fff;
+  --error-color-hover: #de576dff;
+  --error-color: #d03050ff;
+  --warning-color-suppl: #fcb040ff;
+  --warning-color-pressed: #c97c10ff;
+  --warning-color-hover: #fcb040ff;
+  --warning-color: #f0a020ff;
+  --success-color-suppl: #36ad6aff;
+  --success-color-pressed: #0c7a43ff;
+  --success-color-hover: #36ad6aff;
+  --success-color: #18a058ff;
+  --info-color-suppl: #4098fcff;
+  --info-color-pressed: #1060c9ff;
+  --info-color-hover: #4098fcff;
+  --info-color: #2080f0ff;
+  --primary-color-suppl: #1890ff;
+  --primary-color-pressed: #1890ff;
+  --primary-color-hover: #1890ff;
+  --primary-color: #1890ff;
+}
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+}
+
+/* transition fade-slide */
+.fade-slide-leave-active,
+.fade-slide-enter-active {
+  transition: all 0.3s;
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+/* 自定义滚动条样式 */
+.cus-scroll {
+  overflow: auto;
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+}
+.cus-scroll-x {
+  overflow-x: auto;
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 8px;
+  }
+}
+.cus-scroll-y {
+  overflow-y: auto;
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 0;
+  }
+}
+.cus-scroll,
+.cus-scroll-x,
+.cus-scroll-y {
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 4px;
+  }
+  &:hover {
+    &::-webkit-scrollbar-thumb {
+      background: #bfbfbf;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-color);
+    }
+  }
+}
+
+.n-input-number .n-input .n-input-wrapper {
+  --n-padding-left: 0;
+  --n-padding-right: 0;
+  .n-input__input {
+    text-align: center;
+    min-width: 32px;
+  }
+
+  .n-input__suffix {
+    background-color: #f2f3f5;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    width: 32px;
+    height: 32px;
+    border-left: 1px solid #e5e6eb;
+  }
+  .n-input__prefix {
+    height: 32px;
+    background-color: #f2f3f5;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    width: 32px;
+    border-right: 1px solid #e5e6eb;
+  }
+}
+
+.n-collapse-item__header-main {
+  border-bottom: 1px solid #eaeaea;
+}
+
+.n-collapse .n-collapse-item .n-collapse-item__content-wrapper .n-collapse-item__content-inner {
+  padding-top: 12px;
+}
+
+.resizeTable .n-data-table-wrapper {
+  resize: vertical;
+}
