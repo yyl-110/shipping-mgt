@@ -88,3 +88,6 @@ export function useResize(el, cb) {
   observer.observe(el)
   return observer
 }
+
+/** 接口请求成功code  */
+export const RES_SUCCESS_CODE = '200'

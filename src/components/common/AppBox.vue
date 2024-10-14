@@ -5,9 +5,7 @@
         <div class="line" mr-8 h-18 w-4 bg-primary></div>
         <span text-16 font-bold text-hex-1d2129>{{ title }}</span>
       </div>
-      <div px-10 py-12>
-        <slot />
-      </div>
+      <slot />
     </div>
     <n-collapse v-else-if="type === 'collapse'" mb-12 :default-expanded-names="['1']">
       <n-collapse-item name="1">
@@ -16,7 +14,7 @@
             <span text-15 font-bold text-hex-1d2129>{{ title }}</span>
           </div>
         </template>
-        <div px-10 py-12>
+        <div px-10>
           <slot />
         </div>
       </n-collapse-item>

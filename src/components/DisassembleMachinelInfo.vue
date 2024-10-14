@@ -1,13 +1,168 @@
 <template>
-  <div h-500>拆机信息</div>
+  <app-box title="拆机信息" type="collapse">
+    <div flex>
+      <n-button
+        v-for="item in defaultBtn"
+        :key="item.key"
+        attr-type="button"
+        type="primary"
+        mr-12
+        w-90
+        :loading="item.key === 3 && saveTableLoading"
+        @click="handleClick(item)"
+      >
+        <template v-if="item.icon" #icon>
+          <TheIcon :icon="item.icon" type="custom" :size="16" class="mr-3" color="#fff" />
+        </template>
+        {{ item.label }}
+      </n-button>
+    </div>
+    <div class="tableWrap" mt-16>
+      <n-data-table
+        ref="tableRef"
+        v-model:checked-row-keys="checkedRowKeys"
+        :columns="columns"
+        :data="tableData"
+        :pagination="false"
+        :loading="tableLoading"
+        flex-height
+        min-h-300
+        class="resizeTable"
+        :row-key="rowKey"
+        :scroll-x="1740"
+      />
+    </div>
+  </app-box>
 </template>
 
-<script>
-export default {
-  setup() {
-    return {}
-  },
+<script setup>
+import { nextTick, onMounted } from 'vue'
+import { getDisassemblyData, deleteDisassemblyData, saveDisassemblyData } from '../api'
+import { defaultBtn, DisassembleMachinelInfoColumnsArr } from '../data'
+import useHandle from '../hooks/useHandle'
+import { RES_SUCCESS_CODE } from '../utils'
+import { ShowOrEdit } from './tool'
+const { handleDelete } = useHandle()
+
+const rowKey = (row) => row.materialNumber
+const tableRef = ref(null)
+/* 整机信息表格 */
+const tableData = ref([])
+const checkedRowKeys = ref([])
+const tableLoading = ref(false)
+const saveTableLoading = ref(false)
+
+const getDataIndex = (key, data) => {
+  return data.findIndex((item) => item.key === key)
 }
+
+const columns = [
+  {
+    type: 'selection',
+  },
+  {
+    title: '序号',
+    key: 'no',
+    width: '100',
+    align: 'center',
+    render(row, inx) {
+      return inx + 1
+    },
+  },
+  ...DisassembleMachinelInfoColumnsArr.map((item) => {
+    const obj = {
+      title: item.label,
+      key: item.key,
+      width: item.width,
+      render(row) {
+        const index = getDataIndex(row.key, tableData.value)
+        return h(ShowOrEdit, {
+          value: row[item.key],
+          type: item.type,
+          onUpdateValue(v) {
+            tableData.value[index][item.key] = v
+          },
+        })
+      },
+    }
+    return obj
+  }),
+]
+
+/* 获取整机信息表格数据 */
+const fetchData = async () => {
+  try {
+    tableLoading.value = true
+    const res = await getDisassemblyData({ oid: window.oid })
+    if (res.code === RES_SUCCESS_CODE) {
+      tableData.value = res.data
+    }
+  } catch (error) {
+    console.log('error:', error)
+  } finally {
+    tableLoading.value = false
+  }
+}
+
+const handleClick = async (item) => {
+  switch (item.key) {
+    case 1: // 新增
+      tableData.value = [...tableData.value, {}]
+      nextTick(() => {
+        tableRef.value &&
+          tableRef.value.scrollTo({
+            left: 0,
+            top: tableData.value.length * 100,
+            behavior: 'smooth',
+          })
+      })
+      break
+    case 2: // 删除
+      try {
+        if (checkedRowKeys.value.length === 0) {
+          $message.info('请勾选需要删除的数据！')
+          return
+        }
+        const data = tableData.value.filter((val) =>
+          checkedRowKeys.value.includes(val?.materialNumber)
+        )
+        await handleDelete(
+          deleteDisassemblyData,
+          { data, oid: window.oid },
+          checkedRowKeys.value.join(',')
+        )
+        fetchData()
+      } catch (error) {
+        console.log('error:', error)
+      }
+      break
+    case 3: // 保存
+      try {
+        saveTableLoading.value = true
+        const res = await saveDisassemblyData({
+          oid: window.oid,
+          data: tableData.value,
+        })
+        if (res.code === RES_SUCCESS_CODE) {
+          $message.success('保存成功！')
+        }
+      } catch (error) {
+        console.log('error:', error)
+      } finally {
+        saveTableLoading.value = false
+      }
+      break
+    case 4: // 刷新
+      fetchData()
+      break
+    default:
+      break
+  }
+}
+
+onMounted(() => {
+  fetchData()
+})
 </script>
 
 <style lang="scss" scoped></style>

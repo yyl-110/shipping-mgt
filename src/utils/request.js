@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { useDragModal } from '../hooks/useDragModal'
+import { RES_SUCCESS_CODE } from './common'
 // post请求头
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 // create an axios instance
@@ -57,8 +59,8 @@ export function get(url, params) {
         params: params,
       })
       .then((res) => {
-        const { success, message, msg, data = null } = res.data || {}
-        if (!success) {
+        const { code, success, message, msg, data = null } = res.data || {}
+        if (code !== RES_SUCCESS_CODE) {
           $message.error(message || msg)
         }
         resolve(res?.data)
@@ -81,9 +83,19 @@ export function post(url, params, options) {
     service
       .post(url, params, options)
       .then((res) => {
-        const { success, message, msg, data = null } = res.data || {}
-        if (!success) {
+        const { code, success, message, msg, data = null } = res.data || {}
+        if (code !== RES_SUCCESS_CODE) {
           if (showDialog) {
+            $dialog.errorModal({
+              content: message || msg,
+              title: '',
+              showIcon: false,
+              negativeText: '',
+              positiveText: '确定',
+              onAfterEnter: (e) => {
+                useDragModal(e, '.n-dialog__content')
+              },
+            })
           } else {
             $message.error(message || msg)
           }

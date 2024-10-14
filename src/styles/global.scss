@@ -87,7 +87,7 @@ body {
   }
 }
 
-.n-input-number .n-input .n-input-wrapper {
+.baseInputNum .n-input .n-input-wrapper {
   --n-padding-left: 0;
   --n-padding-right: 0;
   .n-input__input {
@@ -121,6 +121,19 @@ body {
   padding-top: 12px;
 }
 
+/* 表格高度拖动 */
 .resizeTable .n-data-table-wrapper {
   resize: vertical;
+}
+
+.n-scrollbar {
+  --n-scrollbar-width: 8px !important;
+  --n-scrollbar-height: 8px !important;
+}
+.n-scrollbar > .n-scrollbar-rail.n-scrollbar-rail--vertical,
+.n-scrollbar + .n-scrollbar-rail.n-scrollbar-rail--vertical {
+  --n-scrollbar-height: 8px !important;
+}
+.n-dialog__content {
+  padding-top: 20px;
 }

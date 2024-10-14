@@ -8,6 +8,7 @@
         type="primary"
         mr-12
         w-90
+        :loading="item.key === 3 && saveTableLoading"
         @click="handleClick(item)"
       >
         <template v-if="item.icon" #icon>
@@ -18,12 +19,15 @@
     </div>
     <div class="tableWrap" mt-16>
       <n-data-table
+        v-model:checked-row-keys="checkedRowKeys"
         :columns="columns"
         :data="tableData"
         :pagination="false"
+        :loading="tableLoading"
         flex-height
         min-h-300
         class="resizeTable"
+        :row-key="rowKey"
       />
     </div>
   </app-box>
@@ -79,45 +83,86 @@
               <n-button attr-type="button" type="primary" ml-auto w-80 @click="search">
                 搜索
               </n-button>
-              <n-button ml-10 w-80>清除</n-button>
+              <n-button ml-10 w-80 @click="cleanUp">清除</n-button>
             </n-form-item-gi>
           </n-grid>
         </n-form>
         <n-data-table
-          :columns="columns"
-          :data="tableData"
+          v-model:checked-row-keys="checkedAddTableRowKeys"
+          :columns="addColumns"
+          :data="addTableData"
           :pagination="false"
           :max-height="350"
           :min-height="200"
+          :loading="addTableLoading"
+          :scroll-x="1050"
+          :row-key="rowKey"
         />
       </main>
       <footer h-70 flex items-center flex-justify-end px-20>
         <n-button mr-20 @click="showModal = false">取消</n-button>
-        <n-button type="primary" @click="confirm">确定</n-button>
+        <n-button type="primary" :loading="saveAddTableLoading" @click="confirm">确定</n-button>
       </footer>
     </div>
   </n-modal>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { getApplicableProductsData } from '../api'
+import { onMounted, reactive } from 'vue'
+import {
+  deleteApplicableProductsData,
+  getApplicableProductsData,
+  queryApplicableProductsData,
+  saveApplicableProductsData,
+} from '../api'
 import { defaultBtn } from '../data'
+import { ShowOrEdit } from './tool'
+import useHandle from '@/hooks/useHandle'
+import { RES_SUCCESS_CODE } from '@/utils'
+const { handleDelete } = useHandle()
 
-const formValue = ref({})
+let formValue = reactive({ number: '', drwoNo: '', name: '' })
 const showModal = ref(false)
 /* 表格数据 */
 const tableData = ref([])
 const tableLoading = ref(false)
+const saveTableLoading = ref(false)
+const checkedRowKeys = ref([])
+const rowKey = (row) => row.materialNumber
+
+/* 新增弹框数据 */
+const addTableData = ref([])
+const addTableLoading = ref(false)
+const checkedAddTableRowKeys = ref([])
+const saveAddTableLoading = ref(false)
+
+const getDataIndex = (key, data) => {
+  return data.findIndex((item) => item.key === key)
+}
+
 const fetchTableInfo = async () => {
   try {
     tableLoading.value = true
-    const res = await getApplicableProductsData({})
+    const res = await getApplicableProductsData({ oid: window.oid })
     tableData.value = res.data
   } catch (error) {
     console.log('error:', error)
   } finally {
     tableLoading.value = false
+  }
+}
+
+const fetchAddTableInfo = async () => {
+  try {
+    addTableLoading.value = true
+    const res = await queryApplicableProductsData({ ...formValue })
+    if (res.code === RES_SUCCESS_CODE) {
+      addTableData.value = res.data
+    }
+  } catch (error) {
+    console.log('error:', error)
+  } finally {
+    addTableLoading.value = false
   }
 }
 
@@ -145,23 +190,145 @@ const columns = [
   {
     title: '设计型号',
     key: 'designModel',
+    render(row) {
+      const index = getDataIndex(row.key, tableData.value)
+      return h(ShowOrEdit, {
+        value: row.designModel,
+        onUpdateValue(v) {
+          tableData.value[index].designModel = v
+        },
+      })
+    },
   },
   {
     title: '配置',
     key: 'configuration',
+    render(row) {
+      const index = getDataIndex(row.key, tableData.value)
+      return h(ShowOrEdit, {
+        value: row.configuration,
+        onUpdateValue(v) {
+          tableData.value[index].configuration = v
+        },
+      })
+    },
   },
 ]
 
-const handleClick = (item) => {
+const addColumns = [
+  {
+    type: 'selection',
+  },
+  {
+    title: '物料编码',
+    key: 'materialNumber',
+  },
+  {
+    title: '物料描述',
+    key: 'materialDesc',
+  },
+  {
+    title: '版本',
+    key: 'version',
+  },
+  {
+    title: '状态',
+    key: 'states',
+  },
+  {
+    title: '采购类型',
+    key: 'purchaseType',
+  },
+  {
+    title: '工厂',
+    key: 'factory',
+  },
+]
+
+const handleClick = async (item) => {
   switch (item.key) {
     case 1: // 新增
       showModal.value = true
+      fetchAddTableInfo()
       break
-
+    case 2: // 删除
+      try {
+        if (checkedRowKeys.value.length === 0) {
+          $message.info('请勾选需要删除的数据！')
+          return
+        }
+        const data = tableData.value.filter((val) =>
+          checkedRowKeys.value.includes(val?.materialNumber)
+        )
+        await handleDelete(
+          deleteApplicableProductsData,
+          { data, oid: window.oid },
+          '适用产品' + checkedRowKeys.value.join(',')
+        )
+        fetchTableInfo()
+      } catch (error) {
+        console.log('error:', error)
+      }
+      break
+    case 3: // 保存
+      try {
+        saveTableLoading.value = true
+        const res = await saveApplicableProductsData({
+          oid: window.oid,
+          type: '0', //适用产品模块保存标识
+          data: tableData.value,
+        })
+        if (res.code === RES_SUCCESS_CODE) {
+          $message.success('保存成功！')
+        }
+      } catch (error) {
+        console.log('error:', error)
+      } finally {
+        saveTableLoading.value = false
+      }
+      break
+    case 4: // 刷新
+      fetchTableInfo()
+      break
     default:
       break
   }
 }
+const search = () => {
+  fetchAddTableInfo()
+}
+const cleanUp = () => {
+  formValue = { number: '', drwoNo: '', name: '' }
+  fetchAddTableInfo()
+}
+
+const confirm = async () => {
+  if (checkedAddTableRowKeys.value.length === 0) {
+    $message.info('请勾选需要添加的适用产品')
+    return
+  }
+  try {
+    saveAddTableLoading.value = true
+    const data = addTableData.value.filter((item) =>
+      checkedAddTableRowKeys.value.includes(item.materialNumber)
+    )
+    const res = await saveApplicableProductsData({
+      oid: window.oid,
+      type: '1',
+      data,
+    })
+    if (res.code === RES_SUCCESS_CODE) {
+      $message.success('新增适用产品成功！')
+      showModal.value = false
+      fetchTableInfo()
+    }
+  } catch (error) {
+    console.log('error:', error)
+  } finally {
+    saveAddTableLoading.value = false
+  }
+}
+
 onMounted(() => {
   fetchTableInfo()
 })

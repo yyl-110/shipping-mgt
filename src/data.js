@@ -39,3 +39,19 @@ export const defaultBtn = [
   { label: '保存', icon: '', key: 3 },
   { label: '刷新', icon: 'icon_resetting', key: 4 },
 ]
+
+export const DisassembleMachinelInfoColumnsArr = [
+  { width: 120, type: 'text', key: 'materialNumber', label: '物料编码' },
+  { width: 120, type: 'text', key: 'materialDesc', label: '物料描述' },
+  { width: 120, type: 'number', key: 'productLength', label: '产品长(mm)' },
+  { width: 120, type: 'number', key: 'productWidth', label: '产品宽(mm)' },
+  { width: 120, type: 'number', key: 'productHeight', label: '产品高(mm)' },
+  { width: 120, type: 'number', key: 'productSingleWeight', label: '产品单重(kg)' },
+  { width: 120, type: 'number', key: 'productWeight', label: '总净重(kg)' },
+  { width: 120, type: 'text', key: 'packingType', label: '包装类型' },
+  { width: 120, type: 'number', key: 'packingLength', label: '包装长(mm)' },
+  { width: 120, type: 'number', key: 'packingWidth', label: '包装宽(mm)' },
+  { width: 120, type: 'number', key: 'packingHeight', label: '包装高(mm)' },
+  { width: 120, type: 'number', key: 'packingWeight', label: '包装重量(kg)' },
+  { width: 120, type: 'number', key: 'grossWeight', label: '毛重(kg)' },
+]
