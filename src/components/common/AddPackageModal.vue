@@ -4,7 +4,7 @@
       <header h-40 flex items-center flex-justify-between px-20>
         <div flex items-center>
           <div class="line" mr-8></div>
-          <span text-14 font-bold text-hex-1d2129>
+          <span text-16 font-bold text-hex-1d2129>
             添加{{ modalType === 1 ? '包装材料' : '包装辅料' }}
           </span>
         </div>
@@ -16,52 +16,14 @@
         />
       </header>
       <main min-h-300 px-20 pt-20>
-        <n-form
-          ref="formRef"
-          :label-width="80"
-          label-placement="left"
-          :model="formValue"
-          require-mark-placement="left"
-          inline
-        >
-          <n-grid :cols="24">
-            <n-form-item-gi :span="6" label="编号" path="number">
-              <n-input
-                v-model:value="formValue.number"
-                placeholder="请输入"
-                clearable
-                @keydown.enter="search"
-              />
-            </n-form-item-gi>
-            <n-form-item-gi :span="6" label="名称" path="name">
-              <n-input
-                v-model:value="formValue.name"
-                placeholder="请输入"
-                clearable
-                @keydown.enter="search"
-              />
-            </n-form-item-gi>
-            <n-form-item-gi :span="6" label="图号" path="drwoNo">
-              <n-input
-                v-model:value="formValue.drwoNo"
-                placeholder="请输入"
-                clearable
-                @keydown.enter="search"
-              />
-            </n-form-item-gi>
-            <n-form-item-gi :span="6">
-              <n-button attr-type="button" type="primary" ml-auto w-80 @click="search">
-                搜索
-              </n-button>
-              <n-button ml-10 w-80 @click="cleanUp">清除</n-button>
-            </n-form-item-gi>
-          </n-grid>
-        </n-form>
+        <search-form @search="search" @clean-up="cleanUp" />
         <n-data-table
           v-model:checked-row-keys="checkedAddTableRowKeys"
           :columns="addColumns"
           :data="addTableData"
-          :pagination="false"
+          :pagination="{
+            pageSize: 10,
+          }"
           :max-height="350"
           :min-height="200"
           :loading="addTableLoading"
@@ -88,7 +50,7 @@ import { RES_SUCCESS_CODE } from '~/src/utils'
 
 const emits = defineEmits(['handleConfirm'])
 
-let formValue = reactive({ number: '', drwoNo: '', name: '' })
+const formValue = ref({ number: '', drwoNo: '', name: '' })
 const showModal = ref(false)
 const addTableData = ref([])
 const addTableLoading = ref(false)
@@ -101,7 +63,7 @@ const fetchAddTableInfo = async () => {
   const api = modalType.value === 1 ? queryPackagingMaterialsData : queryPackagingAuxMaterialsData
   try {
     addTableLoading.value = true
-    const res = await api({ ...formValue })
+    const res = await api({ ...formValue.value })
     if (res.code === RES_SUCCESS_CODE) {
       addTableData.value = res.data
     }
@@ -175,6 +137,15 @@ const addColumns = [
 
 const closeModal = () => {
   addTableData.value = []
+}
+
+const search = (val) => {
+  formValue.value = { ...val }
+  fetchAddTableInfo()
+}
+const cleanUp = (val) => {
+  formValue.value = { ...val }
+  fetchAddTableInfo()
 }
 
 defineExpose({

@@ -9,6 +9,7 @@
         mr-12
         w-90
         :loading="item.key === 3 && saveTableLoading"
+        :disabled="isEdit"
         @click="handleClick(item)"
       >
         <template v-if="item.icon" #icon>
@@ -41,6 +42,7 @@ import AddMachineModal from './common/AddMachineModal.vue'
 import { defaultBtn } from '../data'
 import useHandle from '../hooks/useHandle'
 import { ShowOrEdit } from './tool'
+import useRefreshPage from '@/hooks/useRefreshPage'
 import { RES_SUCCESS_CODE } from '../utils'
 
 const { handleDelete } = useHandle()
@@ -51,8 +53,10 @@ const checkedRowKeys = ref([])
 const tableLoading = ref(false)
 const saveTableLoading = ref(false)
 
+const isEdit = computed(() => window.isEdit)
+
 const getDataIndex = (key, data) => {
-  return data.findIndex((item) => item.key === key)
+  return data.findIndex((item) => item.materialNumber === key)
 }
 
 /* 新增表格数据 */
@@ -71,7 +75,7 @@ const columns = [
     },
   },
   {
-    title: '物料编码',
+    title: h('div', {}, [h('span', { class: 'text-red' }, '*'), '物料编码']),
     key: 'materialNumber',
   },
   {
@@ -82,7 +86,7 @@ const columns = [
     title: '长（mm）',
     key: 'length',
     render(row) {
-      const index = getDataIndex(row.key, tableData.value)
+      const index = getDataIndex(row.materialNumber, tableData.value)
       return h(ShowOrEdit, {
         value: row.length,
         type: 'number',
@@ -96,7 +100,7 @@ const columns = [
     title: '宽（mm）',
     key: 'width',
     render(row) {
-      const index = getDataIndex(row.key, tableData.value)
+      const index = getDataIndex(row.materialNumber, tableData.value)
       return h(ShowOrEdit, {
         value: row.width,
         type: 'number',
@@ -110,7 +114,7 @@ const columns = [
     title: '高（mm）',
     key: 'height',
     render(row) {
-      const index = getDataIndex(row.key, tableData.value)
+      const index = getDataIndex(row.materialNumber, tableData.value)
       return h(ShowOrEdit, {
         value: row.height,
         type: 'number',
@@ -124,7 +128,7 @@ const columns = [
     title: '重量（kg）',
     key: 'weight',
     render(row) {
-      const index = getDataIndex(row.key, tableData.value)
+      const index = getDataIndex(row.materialNumber, tableData.value)
       return h(ShowOrEdit, {
         value: row.weight,
         type: 'number',
@@ -138,7 +142,7 @@ const columns = [
     title: '配置',
     key: 'configuration',
     render(row) {
-      const index = getDataIndex(row.key, tableData.value)
+      const index = getDataIndex(row.materialNumber, tableData.value)
       return h(ShowOrEdit, {
         value: row.configuration,
         onUpdateValue(v) {
@@ -181,6 +185,7 @@ const handleClick = async (item) => {
           { data, oid: window.oid },
           checkedRowKeys.value.join(',')
         )
+        checkedRowKeys.value = []
         fetchData()
       } catch (error) {
         console.log('error:', error)
@@ -213,6 +218,17 @@ const handleClick = async (item) => {
 
 onMounted(() => {
   fetchData()
+})
+
+useRefreshPage(fetchData)
+
+defineExpose({
+  saveData: () =>
+    saveCompleteMachineData({
+      oid: window.oid,
+      type: '0', //适用产品模块保存标识
+      data: tableData.value,
+    }),
 })
 </script>
 

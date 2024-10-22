@@ -48,7 +48,6 @@ export const ShowOrEdit = defineComponent({
                 onUpdateValue: (v) => {
                   inputValue.value = v
                 },
-                onChange: handleChange,
                 onBlur: handleChange,
               })
           : props.value

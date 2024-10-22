@@ -4,6 +4,7 @@
       <div class="title" h-52 flex items-center>
         <div class="line" mr-8 h-18 w-4 bg-primary></div>
         <span text-16 font-bold text-hex-1d2129>{{ title }}</span>
+        <slot name="title" />
       </div>
       <slot />
     </div>
@@ -12,6 +13,7 @@
         <template #header>
           <div h-42 flex items-center>
             <span text-15 font-bold text-hex-1d2129>{{ title }}</span>
+            <slot name="title" />
           </div>
         </template>
         <div px-10>

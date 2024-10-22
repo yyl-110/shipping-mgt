@@ -39,9 +39,21 @@ export const defaultBtn = [
   { label: '保存', icon: '', key: 3 },
   { label: '刷新', icon: 'icon_resetting', key: 4 },
 ]
+/* 发运部件按钮 */
+export const shippingBtn = [
+  { label: '编辑', icon: 'edit', key: 1 },
+  { label: '删除', icon: 'del', key: 2 },
+  { label: '保存', icon: '', key: 3 },
+  { label: '刷新', icon: 'icon_resetting', key: 4 },
+]
 
 export const DisassembleMachinelInfoColumnsArr = [
-  { width: 120, type: 'text', key: 'materialNumber', label: '物料编码' },
+  {
+    width: 120,
+    type: 'text',
+    key: 'materialNumber',
+    label: h('div', {}, [h('span', { class: 'text-red' }, '*'), '物料编码']),
+  },
   { width: 120, type: 'text', key: 'materialDesc', label: '物料描述' },
   { width: 120, type: 'number', key: 'productLength', label: '产品长(mm)' },
   { width: 120, type: 'number', key: 'productWidth', label: '产品宽(mm)' },

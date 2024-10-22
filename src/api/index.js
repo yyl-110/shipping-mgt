@@ -58,3 +58,43 @@ export const deletePackagingAuxMaterialsData = (params) =>
   post('/Windchill/ptc1/shippingProcess/deletePackagingAuxMaterialsData', params) // 删除包装辅料信息
 export const getMaterialPrice = (params) =>
   post('/Windchill/ptc1/shippingProcess/getMaterialPrice', params) // 获取价格信息
+export const getAllShippingPartsData = (params) =>
+  post('/Windchill/ptc1/shippingProcess/getAllShippingPartsData', params) // 获取发运部件及物料明细信息
+export const getShippingPartsData = (params) =>
+  post('/Windchill/ptc1/shippingProcess/getShippingPartsData', params) // 编辑发运部件及物料明细信息
+export const deleteShippingPartsData = (params) =>
+  post('/Windchill/ptc1/shippingProcess/deleteShippingPartsData', params) // 删除装箱单信息-发运部件信息
+/**
+ * @param {*} params //页面5确定按钮标识给"1",发运部件模块保存按钮，页面6确定按钮标识给"0"
+ * @return {*}
+ */
+export const saveShippingPartsData = (params) =>
+  post('/Windchill/ptc1/shippingProcess/saveShippingPartsData', params) // 保存发运部件及物料明细信息
+export const queryShippingMaterialData = (params) =>
+  post('/Windchill/ptc1/shippingProcess/queryShippingMaterialData', params) // 新增装箱单信息-发运部件查询物料明细接口
+export const getAllPackingInfoData = (params) =>
+  post('/Windchill/ptc1/shippingProcess/getAllPackingInfoData', params) // 获取装箱信息及发运部件明细信息
+export const getPackingInfoData = (params) =>
+  post('/Windchill/ptc1/shippingProcess/getPackingInfoData', params) // 编辑装箱信息及发运部件明细信息
+export const savePackingInfoData = (params) =>
+  post('/Windchill/ptc1/shippingProcess/savePackingInfoData', params) // 保存装箱信息及发运部件明细信息
+export const deletePackingInfoData = (params) =>
+  post('/Windchill/ptc1/shippingProcess/deletePackingInfoData', params) // 保存装箱信息及发运部件明细信息
+export const getAttachments = (params) =>
+  post('/Windchill/ptc1/shippingProcess/getAttachments', params) // 获取发运方案附件信息
+export const uploadFile = (params) =>
+  post('/Windchill/ptc1/shippingProcess/uploadFile', params, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }) // 上传附件
+export const removeAttachment = (params) =>
+  post('/Windchill/ptc1/shippingProcess/removeAttachment', params) //  移除附件
+export const batchExportExcel = (params) =>
+  post('/Windchill/ptc1/shippingProcess/batchExportExcel', params) //  批量出
+export const batchImportExcel = (params) =>
+  post('/Windchill/ptc1/shippingProcess/batchImportExcel', params, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }) //  批量入

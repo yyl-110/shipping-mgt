@@ -13,9 +13,12 @@
       >
         <header min-w-160 text-center>发运方案</header>
         <div class="flex" ml-auto pr-20>
-          <n-button quaternary color="#fff" mr-10>一键保存</n-button>
-          <n-button quaternary color="#fff" mr-10>批量导入</n-button>
-          <n-button quaternary color="#fff">批量导出</n-button>
+          <n-button quaternary color="#fff" mr-10 @click="save">一键保存</n-button>
+          <n-button quaternary color="#fff" mr-10 @click="batchImport">
+            批量导入
+            <input ref="fileInput" hidden type="file" @change="handleFileChange" />
+          </n-button>
+          <n-button quaternary color="#fff" @click="batchExport">批量导出</n-button>
         </div>
       </n-layout-header>
       <n-layout position="absolute" style="top: 52px; bottom: 0" has-sider>
@@ -41,16 +44,18 @@
           @scroll="handleScroll"
         >
           <div w-full>
-            <BaseInfo :ref="setRef" />
-            <!-- 适用 -->
-            <ApplicableProduct />
-            <MachineInfo :ref="setRef" />
-            <DisassembleMachinelInfo :ref="setRef" />
-            <PackagingInfo :ref="setRef" />
-            <PackagingAccesInfo :ref="setRef" />
-            <MaterialPacking :ref="setRef" />
-            <LoadingPlan :ref="setRef" />
-            <Enclosure :ref="setRef" />
+            <n-spin :show="loading">
+              <BaseInfo :ref="setRef" />
+              <!-- 适用 -->
+              <ApplicableProduct />
+              <MachineInfo :ref="setRef" />
+              <DisassembleMachinelInfo :ref="setRef" />
+              <PackagingInfo :ref="setRef" />
+              <PackagingAccesInfo :ref="setRef" />
+              <MaterialPacking :ref="setRef" />
+              <LoadingPlan :ref="setRef" />
+              <Enclosure :ref="setRef" />
+            </n-spin>
           </div>
         </n-layout-content>
       </n-layout>
@@ -60,24 +65,34 @@
 
 <script setup>
 import AppProvider from '~/src/components/AppProvider.vue'
-import { onBeforeMount, ref } from 'vue'
+import { onBeforeMount, onUpdated, ref } from 'vue'
 import { menuOptions } from './data'
+import { batchExportExcel, batchImportExcel } from './api'
+import { isArray, RES_SUCCESS_CODE } from './utils'
+import { useAppStore } from './store'
+
+const { refreshPage } = useAppStore()
 
 const navWrapper = ref([])
 const contentRef = ref(null)
 const activeValue = ref(1)
+const loading = ref(false)
+const fileInput = ref(null)
 
 /** 滚动监听  */
 const handleScroll = (e) => {
   const scrollY = e.target.scrollTop
   for (var i = 0; i < navWrapper.value.length; i++) {
-    if (scrollY + 50 > navWrapper.value[i]?.$el.offsetTop) {
+    if (scrollY + 50 > navWrapper.value[i]?.$el.offsetTop - navWrapper.value[0].$el.clientHeight) {
       activeValue.value = i + 1
     }
   }
 }
 
 const setRef = (el) => {
+  if (navWrapper.value.length === 8) {
+    return
+  }
   navWrapper.value.push(el)
 }
 
@@ -92,7 +107,7 @@ const menuChange = (val) => {
   }
   activeValue.value = val
   contentRef.value?.scrollTo({
-    top: navWrapper.value[val - 1]?.$el.offsetTop,
+    top: navWrapper.value[val - 1]?.$el.offsetTop - navWrapper.value[0].$el.clientHeight,
     behavior: 'smooth',
   })
 }
@@ -100,7 +115,79 @@ onBeforeMount(() => {
   const queryString = window.location.search
   const urlParams = new URLSearchParams(queryString)
   window.oid = urlParams.get('oid')
+  window.isEdit = urlParams.get('isEdit') !== 'true'
 })
+
+/* 批量导出 */
+const batchExport = async () => {
+  try {
+    loading.value = true
+    const res = await batchExportExcel({ oid: window.oid })
+    if (res.code === RES_SUCCESS_CODE) {
+      $message.success('导出成功')
+    }
+  } catch (error) {
+    console.log('error:', error)
+  } finally {
+    loading.value = false
+  }
+}
+/* 批量导入 */
+const batchImport = async () => {
+  fileInput.value.click()
+  // try {
+  //   loading.value = true
+  //   const res = await batchImportExcel({ oid: window.oid })
+  //   if (res.code === RES_SUCCESS_CODE) {
+  //     $message.success('导入成功')
+  //     refreshPage()
+  //   }
+  // } catch (error) {
+  //   console.log('error:', error)
+  // } finally {
+  //   loading.value = false
+  // }
+}
+
+const save = async () => {
+  let apiList = []
+  try {
+    navWrapper.value.forEach((item) => {
+      if (item?.saveData) {
+        apiList.push(item?.saveData)
+      }
+    })
+    const res = await Promise.all(apiList.map((item) => item()))
+    if (!res?.some((item) => item.code !== RES_SUCCESS_CODE)) {
+      $message.success('保存成功！')
+      refreshPage()
+    }
+  } catch (error) {
+    console.log('error:', error)
+  } finally {
+    loading.value = false
+    apiList = []
+  }
+}
+
+const handleFileChange = async (e) => {
+  try {
+    loading.value = true
+    const fileData = e.target.files[0]
+    const formData = new FormData()
+    formData.append('oid', window.oid)
+    formData.append('file', fileData)
+    const res = await batchImportExcel(formData)
+    if (res.code === RES_SUCCESS_CODE) {
+      $message.success('导入成功')
+      refreshPage()
+    }
+  } catch (error) {
+    console.log('error:', error)
+  } finally {
+    loading.value = false
+  }
+}
 
 onMounted(() => {})
 </script>

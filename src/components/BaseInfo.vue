@@ -1,5 +1,5 @@
 <template>
-  <app-box title="发运基本信息" left-0 top-0 z-9 bg-hex-fff>
+  <app-box title="发运基本信息" position-sticky left-0 top-0 z-9 bg-hex-fff>
     <n-form
       ref="formRef"
       :model="formValue"
@@ -74,7 +74,9 @@
               <the-icon icon="input_add" :size="14" type="custom" />
             </template>
           </n-input-number>
-          <n-button type="primary" ml-24>点击计算</n-button>
+          <n-button type="primary" ml-24 :disabled="isEdit" @click="clickCalcCost">
+            点击计算
+          </n-button>
         </n-form-item-gi>
         <n-form-item-gi :span="8" label="单台包装成本">
           <n-input v-model:value="formValue.eachCost" disabled />
@@ -96,7 +98,15 @@
           />
         </n-form-item-gi>
         <n-form-item-gi :span="6" class="noRule" flex flex-col justify-end pb-16>
-          <n-button type="primary" ml-auto mt-auto w-100 :loading="saveLoading" @click="saveData">
+          <n-button
+            type="primary"
+            ml-auto
+            mt-auto
+            w-100
+            :loading="saveLoading"
+            :disabled="isEdit"
+            @click="saveData"
+          >
             保存
           </n-button>
         </n-form-item-gi>
@@ -106,16 +116,24 @@
 </template>
 
 <script setup>
-import { onMounted, reactive } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { getBaseStructure, getShippingBasicData, saveShippingBasicData } from '../api'
 import { RES_SUCCESS_CODE } from '../utils'
 import AppBox from './common/AppBox.vue'
+import useRefreshPage from '@/hooks/useRefreshPage'
+import { useAppStore } from '../store'
+import { storeToRefs } from 'pinia'
 const rules = []
 const formValue = ref({})
 const companyValue = ref([])
 const salesModelValue = ref([])
 const shippingFormValue = ref([])
 const saveLoading = ref(false)
+const isEdit = computed(() => window.isEdit)
+
+const { calcCost } = useAppStore()
+const app = useAppStore()
+const { totalCost } = storeToRefs(app)
 
 const fetchEnum = async () => {
   try {
@@ -152,9 +170,20 @@ const fetchInfo = async () => {
   }
 }
 
+const clickCalcCost = async () => {
+  calcCost()
+  formValue.value.totalCost = totalCost.value
+}
+
 onMounted(() => {
   fetchEnum()
   fetchInfo()
+})
+
+useRefreshPage(fetchInfo)
+
+defineExpose({
+  saveData: () => saveShippingBasicData({ ...formValue.value }),
 })
 </script>
 

@@ -7,6 +7,10 @@ export const useAppStore = defineStore('app', {
     return {
       collapsed: false,
       isDark,
+      refreshFlag: false, // 刷新整个页面
+      totalCost: 0,
+      materialCost: 0, // 包装材料总价
+      accessoriesCost: 0, // 包装辅料总价
     }
   },
   actions: {
@@ -23,6 +27,22 @@ export const useAppStore = defineStore('app', {
     /** 切换/关闭 暗黑模式 */
     toggleDark() {
       this.isDark = !this.isDark
+    },
+    refreshPage() {
+      this.refreshFlag++ // 更新全局状态
+    },
+    updateMaterial(val) {
+      this.materialCost = val
+    },
+    updateAccessories(val) {
+      this.accessoriesCost = val
+    },
+    calcCost() {
+      try {
+        this.totalCost = Number((this.materialCost + this.accessoriesCost).toFixed(3))
+      } catch (error) {
+        console.log('error:', error)
+      }
     },
   },
 })

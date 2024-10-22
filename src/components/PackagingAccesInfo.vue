@@ -8,6 +8,7 @@
         type="primary"
         mr-12
         w-90
+        :disabled="isEdit"
         :loading="item.key === 3 && saveTableLoading"
         @click="handleClick(item)"
       >
@@ -16,7 +17,9 @@
         </template>
         {{ item.label }}
       </n-button>
-      <n-button ml-30 type="primary" :loading="priceLoading" @click="getPrice">获取价格</n-button>
+      <n-button ml-30 type="primary" :loading="priceLoading" :disabled="isEdit" @click="getPrice">
+        获取价格
+      </n-button>
     </div>
     <div class="tableWrap" mt-16>
       <n-data-table
@@ -32,7 +35,7 @@
         :scroll-x="1200"
       />
     </div>
-    <AddPackageModal ref="addModalRef" handle-confirm="fetchData" />
+    <AddPackageModal ref="addModalRef" @handle-confirm="fetchData" />
   </app-box>
 </template>
 
@@ -49,8 +52,12 @@ import useHandle from '../hooks/useHandle'
 import { RES_SUCCESS_CODE } from '../utils'
 import { ShowOrEdit } from './tool'
 import AddPackageModal from './common/AddPackageModal.vue'
+import useRefreshPage from '../hooks/useRefreshPage'
+import { useAppStore } from '../store'
 
 const { handleDelete } = useHandle()
+
+const { updateAccessories } = useAppStore()
 
 const rowKey = (row) => row.materialNumber
 /* 表格 */
@@ -61,8 +68,10 @@ const saveTableLoading = ref(false)
 const priceLoading = ref(false)
 const addModalRef = ref(null)
 
+const isEdit = computed(() => window.isEdit)
+
 const getDataIndex = (key, data) => {
-  return data.findIndex((item) => item.key === key)
+  return data.findIndex((item) => item.materialNumber === key)
 }
 
 const columns = [
@@ -79,7 +88,7 @@ const columns = [
     },
   },
   {
-    title: '物料编码',
+    title: h('div', {}, [h('span', { class: 'text-red' }, '*'), '物料编码']),
     key: 'materialNumber',
   },
   {
@@ -94,7 +103,7 @@ const columns = [
     title: '数量',
     key: 'quantity',
     render(row) {
-      const index = getDataIndex(row.key, tableData.value)
+      const index = getDataIndex(row.materialNumber, tableData.value)
       return h(ShowOrEdit, {
         value: row.quantity,
         type: 'number',
@@ -112,7 +121,7 @@ const columns = [
     title: '长（mm）',
     key: 'length',
     render(row) {
-      const index = getDataIndex(row.key, tableData.value)
+      const index = getDataIndex(row.materialNumber, tableData.value)
       return h(ShowOrEdit, {
         value: row.length,
         type: 'number',
@@ -126,7 +135,7 @@ const columns = [
     title: '宽（mm）',
     key: 'width',
     render(row) {
-      const index = getDataIndex(row.key, tableData.value)
+      const index = getDataIndex(row.materialNumber, tableData.value)
       return h(ShowOrEdit, {
         value: row.width,
         type: 'number',
@@ -140,7 +149,7 @@ const columns = [
     title: '高（mm）',
     key: 'height',
     render(row) {
-      const index = getDataIndex(row.key, tableData.value)
+      const index = getDataIndex(row.materialNumber, tableData.value)
       return h(ShowOrEdit, {
         value: row.height,
         type: 'number',
@@ -154,7 +163,7 @@ const columns = [
     title: '重量（kg）',
     key: 'weight',
     render(row) {
-      const index = getDataIndex(row.key, tableData.value)
+      const index = getDataIndex(row.materialNumber, tableData.value)
       return h(ShowOrEdit, {
         value: row.weight,
         type: 'number',
@@ -198,6 +207,7 @@ const handleClick = async (item) => {
           { data, oid: window.oid },
           checkedRowKeys.value.join(',')
         )
+        checkedRowKeys.value = []
         fetchData()
       } catch (error) {
         console.log('error:', error)
@@ -235,7 +245,10 @@ const getPrice = async () => {
     const res = await getMaterialPrice({ oid: window.oid, data: list })
     if (res.code === RES_SUCCESS_CODE) {
       $message.success('操作成功')
-      fetchData()
+      tableData.value = tableData.value.map((item) => {
+        const obj = res.data.find((val) => val.materialNumber === item?.materialNumber) || {}
+        return { ...item, ...obj }
+      })
     }
   } catch (error) {
     console.log('error:', error)
@@ -247,6 +260,29 @@ const getPrice = async () => {
 onMounted(() => {
   fetchData()
 })
+
+useRefreshPage(fetchData)
+
+defineExpose({
+  saveData: () =>
+    savePackagingAuxMaterialsData({
+      oid: window.oid,
+      type: '0', //适用产品模块保存标识
+      data: tableData.value,
+    }),
+})
+
+watch(
+  () => tableData.value,
+  () => {
+    const total = tableData.value.reduce((acc, current) => {
+      const val = current.quantity * current.unitPrice
+      return acc + val
+    }, 0)
+    updateAccessories(total)
+  },
+  { deep: true }
+)
 </script>
 
 <style lang="scss" scoped></style>

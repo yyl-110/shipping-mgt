@@ -9,6 +9,7 @@
         mr-12
         w-90
         :loading="item.key === 3 && saveTableLoading"
+        :disabled="isEdit"
         @click="handleClick(item)"
       >
         <template v-if="item.icon" #icon>
@@ -36,7 +37,7 @@
       <header h-40 flex items-center flex-justify-between px-20>
         <div flex items-center>
           <div class="line" mr-8></div>
-          <span text-14 font-bold text-hex-1d2129>添加适用产品</span>
+          <span text-16 font-bold text-hex-1d2129>添加适用产品</span>
         </div>
         <img
           src="@/assets/images/close.png"
@@ -46,52 +47,15 @@
         />
       </header>
       <main min-h-300 px-20 pt-20>
-        <n-form
-          ref="formRef"
-          :label-width="80"
-          label-placement="left"
-          :model="formValue"
-          require-mark-placement="left"
-          inline
-        >
-          <n-grid :cols="24">
-            <n-form-item-gi :span="6" label="编号" path="number">
-              <n-input
-                v-model:value="formValue.number"
-                placeholder="请输入"
-                clearable
-                @keydown.enter="search"
-              />
-            </n-form-item-gi>
-            <n-form-item-gi :span="6" label="名称" path="name">
-              <n-input
-                v-model:value="formValue.name"
-                placeholder="请输入"
-                clearable
-                @keydown.enter="search"
-              />
-            </n-form-item-gi>
-            <n-form-item-gi :span="6" label="图号" path="drwoNo">
-              <n-input
-                v-model:value="formValue.drwoNo"
-                placeholder="请输入"
-                clearable
-                @keydown.enter="search"
-              />
-            </n-form-item-gi>
-            <n-form-item-gi :span="6">
-              <n-button attr-type="button" type="primary" ml-auto w-80 @click="search">
-                搜索
-              </n-button>
-              <n-button ml-10 w-80 @click="cleanUp">清除</n-button>
-            </n-form-item-gi>
-          </n-grid>
-        </n-form>
+        <search-form @search="search" @clean-up="cleanUp" />
+
         <n-data-table
           v-model:checked-row-keys="checkedAddTableRowKeys"
           :columns="addColumns"
           :data="addTableData"
-          :pagination="false"
+          :pagination="{
+            pageSize: 10,
+          }"
           :max-height="350"
           :min-height="200"
           :loading="addTableLoading"
@@ -108,7 +72,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive } from 'vue'
+import { onMounted, reactive, watch } from 'vue'
 import {
   deleteApplicableProductsData,
   getApplicableProductsData,
@@ -119,6 +83,7 @@ import { defaultBtn } from '../data'
 import { ShowOrEdit } from './tool'
 import useHandle from '@/hooks/useHandle'
 import { RES_SUCCESS_CODE } from '@/utils'
+import useRefreshPage from '@/hooks/useRefreshPage'
 const { handleDelete } = useHandle()
 
 let formValue = reactive({ number: '', drwoNo: '', name: '' })
@@ -136,8 +101,10 @@ const addTableLoading = ref(false)
 const checkedAddTableRowKeys = ref([])
 const saveAddTableLoading = ref(false)
 
+const isEdit = computed(() => window.isEdit)
+
 const getDataIndex = (key, data) => {
-  return data.findIndex((item) => item.key === key)
+  return data.findIndex((item) => item.materialNumber === key)
 }
 
 const fetchTableInfo = async () => {
@@ -180,7 +147,7 @@ const columns = [
     },
   },
   {
-    title: '物料编码',
+    title: h('div', {}, [h('span', { class: 'text-red' }, '*'), '物料编码']),
     key: 'materialNumber',
   },
   {
@@ -191,7 +158,7 @@ const columns = [
     title: '设计型号',
     key: 'designModel',
     render(row) {
-      const index = getDataIndex(row.key, tableData.value)
+      const index = getDataIndex(row.materialNumber, tableData.value)
       return h(ShowOrEdit, {
         value: row.designModel,
         onUpdateValue(v) {
@@ -204,7 +171,7 @@ const columns = [
     title: '配置',
     key: 'configuration',
     render(row) {
-      const index = getDataIndex(row.key, tableData.value)
+      const index = getDataIndex(row.materialNumber, tableData.value)
       return h(ShowOrEdit, {
         value: row.configuration,
         onUpdateValue(v) {
@@ -265,6 +232,7 @@ const handleClick = async (item) => {
           { data, oid: window.oid },
           '适用产品' + checkedRowKeys.value.join(',')
         )
+        checkedRowKeys.value = []
         fetchTableInfo()
       } catch (error) {
         console.log('error:', error)
@@ -294,7 +262,8 @@ const handleClick = async (item) => {
       break
   }
 }
-const search = () => {
+const search = (val) => {
+  formValue = { ...val }
   fetchAddTableInfo()
 }
 const cleanUp = () => {
@@ -331,6 +300,17 @@ const confirm = async () => {
 
 onMounted(() => {
   fetchTableInfo()
+})
+
+useRefreshPage(fetchTableInfo)
+
+defineExpose({
+  saveData: () =>
+    saveApplicableProductsData({
+      oid: window.oid,
+      type: '0', //适用产品模块保存标识
+      data: tableData.value,
+    }),
 })
 </script>
 

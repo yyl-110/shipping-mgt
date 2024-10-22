@@ -4,7 +4,7 @@
       <header h-40 flex items-center flex-justify-between px-20>
         <div flex items-center>
           <div class="line" mr-8></div>
-          <span text-16 font-bold text-hex-1d2129>添加整机信息</span>
+          <span text-16 font-bold text-hex-1d2129>添加发运部件物料明细</span>
         </div>
         <img
           src="@/assets/images/close.png"
@@ -38,7 +38,7 @@
 </template>
 
 <script setup>
-import { queryCompleteMachineData, saveCompleteMachineData } from '~/src/api'
+import { queryShippingMaterialData } from '~/src/api'
 import { RES_SUCCESS_CODE } from '~/src/utils'
 
 const emits = defineEmits(['handleConfirm'])
@@ -54,7 +54,7 @@ const rowKey = (row) => row.materialNumber
 const fetchAddTableInfo = async () => {
   try {
     addTableLoading.value = true
-    const res = await queryCompleteMachineData({ ...formValue })
+    const res = await queryShippingMaterialData({ ...formValue })
     if (res.code === RES_SUCCESS_CODE) {
       addTableData.value = res.data
     }
@@ -69,31 +69,22 @@ const show = () => {
   showModal.value = true
   fetchAddTableInfo()
 }
+const hide = () => {
+  showModal.value = false
+}
 
 const confirm = async () => {
   if (checkedAddTableRowKeys.value.length === 0) {
-    $message.info('请勾选需要添加的整机信息')
+    $message.info('请勾选需要添加的数据')
     return
   }
   try {
-    saveAddTableLoading.value = true
     const data = addTableData.value.filter((item) =>
       checkedAddTableRowKeys.value.includes(item.materialNumber)
     )
-    const res = await saveCompleteMachineData({
-      oid: window.oid,
-      type: '1',
-      data,
-    })
-    if (res.code === RES_SUCCESS_CODE) {
-      $message.success('新增整机成功！')
-      showModal.value = false
-      emits('handleConfirm')
-    }
+    emits('handleConfirm', data)
   } catch (error) {
     console.log('error:', error)
-  } finally {
-    saveAddTableLoading.value = false
   }
 }
 
@@ -110,8 +101,8 @@ const addColumns = [
     key: 'materialDesc',
   },
   {
-    title: '版本',
-    key: 'version',
+    title: '英文描述',
+    key: 'englishDesc',
   },
   {
     title: '状态',
@@ -136,13 +127,14 @@ const cleanUp = (val) => {
   fetchAddTableInfo()
 }
 
+defineExpose({
+  show,
+  hide,
+})
+
 const closeModal = () => {
   checkedAddTableRowKeys.value = []
 }
-
-defineExpose({
-  show,
-})
 </script>
 
 <style lang="scss" scoped></style>
