@@ -31,7 +31,7 @@
         :row-key="rowKey"
       />
     </div>
-    <AddMachineModal ref="addModalRef" handle-confirm="fetchData" />
+    <AddMachineModal ref="addModalRef" @handle-confirm="fetchData" />
   </app-box>
 </template>
 

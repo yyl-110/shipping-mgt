@@ -11,6 +11,8 @@ export const useAppStore = defineStore('app', {
       totalCost: 0,
       materialCost: 0, // 包装材料总价
       accessoriesCost: 0, // 包装辅料总价
+      inputPackagingInfoState: true, // 包装材料数量、单价是否填写完成
+      inputPackagingAccesInfoState: true, // 包装辅料数量、单价是否填写完成
     }
   },
   actions: {
@@ -43,6 +45,12 @@ export const useAppStore = defineStore('app', {
       } catch (error) {
         console.log('error:', error)
       }
+    },
+    updatePackagingAccesInfoState(state) {
+      this.inputPackagingAccesInfoState = state
+    },
+    updatePackagingInfoState(state) {
+      this.inputPackagingInfoState = state
     },
   },
 })

@@ -7,6 +7,7 @@
       label-placement="left"
       inline
       px-20
+      size="small"
       pt-10
     >
       <n-grid :cols="24" :x-gap="24">
@@ -81,7 +82,7 @@
         <n-form-item-gi :span="8" label="单台包装成本">
           <n-input v-model:value="formValue.eachCost" disabled />
         </n-form-item-gi>
-        <n-form-item-gi :span="20" label="方案说明">
+        <n-form-item-gi :span="12" label="方案说明">
           <n-input
             v-model:value="formValue.schemeDescription"
             type="textarea"
@@ -89,7 +90,7 @@
             show-count
           />
         </n-form-item-gi>
-        <n-form-item-gi :span="16" label="特殊要求">
+        <n-form-item-gi :span="12" label="特殊要求">
           <n-input
             v-model:value="formValue.specialRequirements"
             type="textarea"
@@ -97,7 +98,7 @@
             show-count
           />
         </n-form-item-gi>
-        <n-form-item-gi :span="6" class="noRule" flex flex-col justify-end pb-16>
+        <n-form-item-gi :span="24" class="noRule" flex flex-col justify-end pb-10>
           <n-button
             type="primary"
             ml-auto
@@ -128,19 +129,21 @@ const formValue = ref({})
 const companyValue = ref([])
 const salesModelValue = ref([])
 const shippingFormValue = ref([])
+const transportationValue = ref([])
 const saveLoading = ref(false)
 const isEdit = computed(() => window.isEdit)
 
 const { calcCost } = useAppStore()
 const app = useAppStore()
-const { totalCost } = storeToRefs(app)
+const { totalCost, inputPackagingInfoState, inputPackagingAccesInfoState } = storeToRefs(app)
 
 const fetchEnum = async () => {
   try {
-    const res = await getBaseStructure({})
+    const res = await getBaseStructure({ oid: window.oid })
     companyValue.value = res?.data?.companyValue || []
     salesModelValue.value = res?.data?.salesModelValue || []
     shippingFormValue.value = res?.data?.shippingFormValue || []
+    transportationValue.value = res?.data?.transportationValue || []
   } catch (error) {
     console.log('error:', error)
   }
@@ -150,7 +153,7 @@ const fetchEnum = async () => {
 const saveData = async () => {
   try {
     saveLoading.value = true
-    const res = await saveShippingBasicData({ ...formValue.value })
+    const res = await saveShippingBasicData({ data: { ...formValue.value }, oid: window.oid })
     if (res.code === RES_SUCCESS_CODE) {
       $message.success('保存成功！')
     }
@@ -171,6 +174,14 @@ const fetchInfo = async () => {
 }
 
 const clickCalcCost = async () => {
+  if (!inputPackagingInfoState.value) {
+    $message.warning('包装材料数量、单价不能为空')
+    return
+  }
+  if (!inputPackagingAccesInfoState.value) {
+    $message.warning('包装辅料数量、单价不能为空')
+    return
+  }
   calcCost()
   formValue.value.totalCost = totalCost.value
 }
@@ -183,13 +194,27 @@ onMounted(() => {
 useRefreshPage(fetchInfo)
 
 defineExpose({
-  saveData: () => saveShippingBasicData({ ...formValue.value }),
+  saveData: () => saveShippingBasicData({ data: { ...formValue.value }, oid: window.oid }),
 })
+
+watch(
+  [() => formValue.value.totalCost, () => formValue.value.shippingQuantity],
+  () => {
+    try {
+      formValue.value.eachCost = Number(
+        (formValue.value.totalCost / formValue.value.shippingQuantity).toFixed(3)
+      )
+    } catch (error) {
+      console.log('error:', error)
+    }
+  },
+  { deep: true }
+)
 </script>
 
 <style lang="scss" scoped>
 ::v-deep .n-form-item .n-form-item-feedback-wrapper {
-  --n-feedback-height: 16px;
+  --n-feedback-height: 12px;
 }
 ::v-deep .noRule {
   .n-form-item-feedback-wrapper {

@@ -123,13 +123,20 @@ const addColumns = [
         placeholder: '请选择',
         options: options.value,
         value: selectMaterialNumber.value,
+        valueField: 'materialNumber',
+        labelField: 'materialNumber',
         filterable: true,
-        async onUpdateValue(v) {
-          const obj = options.value.find((item) => item.value === v)
+        async onUpdateValue(v, item) {
+          // const obj = options.value.find((item) => item.value === v)
+          const { width, materialDesc, height, length, quantity } = item || {}
           addTableData.value[index].materialNumber = v
           selectMaterialNumber.value = v
-          await fetchData()
-          addTableData.value[index].materialDesc = obj?.desc
+          // await fetchData()
+          addTableData.value[index].materialDesc = materialDesc
+          addTableData.value[index].height = height
+          addTableData.value[index].length = length
+          addTableData.value[index].width = width
+          addTableData.value[index].quantity = quantity
         },
       })
     },
@@ -328,11 +335,7 @@ const fetchPackageList = async () => {
   try {
     const res = await getPackagingMaterialsData({ oid: window.oid })
     if (res.code === RES_SUCCESS_CODE) {
-      options.value = res.data.map((item) => ({
-        value: item.materialNumber,
-        label: item.materialNumber,
-        desc: item.materialDesc,
-      }))
+      options.value = res.data || []
     }
   } catch (error) {
     console.log('error:', error)
@@ -448,6 +451,7 @@ defineExpose({
 
 const closeModal = () => {
   checkedAddTableRowKeys.value = []
+  detailedTableData.value = []
 }
 
 watch(

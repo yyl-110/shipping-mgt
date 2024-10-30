@@ -142,13 +142,17 @@ const handleClick = async (item) => {
             return { ...item }
           })
         const deleteArr = data.map((item) => item.materialNumber)
-        await handleDelete(
-          deleteDisassemblyData,
-          { data, oid: window.oid },
-          deleteArr.value.join(',')
-        )
-        checkedRowKeys.value = []
-        fetchData()
+        $dialog.confirm({
+          content: `是否确认删除${deleteArr.join(',')}`,
+          negativeText: '取消',
+          positiveText: '确认',
+          onPositiveClick: () => {
+            tableData.value = tableData.value.filter(
+              (item) => !checkedRowKeys.value.includes(item?.id)
+            )
+            checkedRowKeys.value = []
+          },
+        })
       } catch (error) {
         console.log('error:', error)
       }

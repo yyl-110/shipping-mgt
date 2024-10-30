@@ -54,7 +54,7 @@ const rowKey = (row) => row.materialNumber
 const fetchAddTableInfo = async () => {
   try {
     addTableLoading.value = true
-    const res = await queryShippingMaterialData({ ...formValue })
+    const res = await queryShippingMaterialData({ ...formValue, oid: window.oid })
     if (res.code === RES_SUCCESS_CODE) {
       addTableData.value = res.data
     }
@@ -67,7 +67,7 @@ const fetchAddTableInfo = async () => {
 
 const show = () => {
   showModal.value = true
-  fetchAddTableInfo()
+  // fetchAddTableInfo()
 }
 const hide = () => {
   showModal.value = false
@@ -134,6 +134,7 @@ defineExpose({
 
 const closeModal = () => {
   checkedAddTableRowKeys.value = []
+  addTableData.value = []
 }
 </script>
 

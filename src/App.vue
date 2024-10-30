@@ -13,8 +13,10 @@
       >
         <header min-w-160 text-center>发运方案</header>
         <div class="flex" ml-auto pr-20>
-          <n-button quaternary color="#fff" mr-10 @click="save">一键保存</n-button>
-          <n-button quaternary color="#fff" mr-10 @click="batchImport">
+          <n-button quaternary color="#fff" mr-10 :disabled="eidtState" @click="save">
+            一键保存
+          </n-button>
+          <n-button quaternary color="#fff" mr-10 :disabled="eidtState" @click="batchImport">
             批量导入
             <input ref="fileInput" hidden type="file" @change="handleFileChange" />
           </n-button>
@@ -54,7 +56,7 @@
               <PackagingAccesInfo :ref="setRef" />
               <MaterialPacking :ref="setRef" />
               <LoadingPlan :ref="setRef" />
-              <Enclosure :ref="setRef" />
+              <!-- <Enclosure :ref="setRef" /> -->
             </n-spin>
           </div>
         </n-layout-content>
@@ -65,11 +67,12 @@
 
 <script setup>
 import AppProvider from '~/src/components/AppProvider.vue'
-import { onBeforeMount, onUpdated, ref } from 'vue'
+import { computed, onBeforeMount, onUpdated, ref } from 'vue'
 import { menuOptions } from './data'
 import { batchExportExcel, batchImportExcel } from './api'
 import { isArray, RES_SUCCESS_CODE } from './utils'
 import { useAppStore } from './store'
+import _ from 'lodash-es'
 
 const { refreshPage } = useAppStore()
 
@@ -90,7 +93,7 @@ const handleScroll = (e) => {
 }
 
 const setRef = (el) => {
-  if (navWrapper.value.length === 8) {
+  if (navWrapper.value.length === 7) {
     return
   }
   navWrapper.value.push(el)
@@ -117,6 +120,8 @@ onBeforeMount(() => {
   window.oid = urlParams.get('oid')
   window.isEdit = urlParams.get('isEdit') !== 'true'
 })
+
+const eidtState = computed(() => window.isEdit)
 
 /* 批量导出 */
 const batchExport = async () => {
@@ -157,7 +162,7 @@ const save = async () => {
         apiList.push(item?.saveData)
       }
     })
-    const res = await Promise.all(apiList.map((item) => item()))
+    const res = await Promise.all(_.flatten(apiList.map((item) => item())))
     if (!res?.some((item) => item.code !== RES_SUCCESS_CODE)) {
       $message.success('保存成功！')
       refreshPage()

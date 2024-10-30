@@ -27,10 +27,10 @@ export const menuOptions = [
     label: '装载方案',
     key: 7,
   },
-  {
-    label: '附件',
-    key: 8,
-  },
+  // {
+  //   label: '附件',
+  //   key: 8,
+  // },
 ]
 
 export const defaultBtn = [

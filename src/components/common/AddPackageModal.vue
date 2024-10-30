@@ -63,7 +63,7 @@ const fetchAddTableInfo = async () => {
   const api = modalType.value === 1 ? queryPackagingMaterialsData : queryPackagingAuxMaterialsData
   try {
     addTableLoading.value = true
-    const res = await api({ ...formValue.value })
+    const res = await api({ ...formValue.value, oid: window.oid })
     if (res.code === RES_SUCCESS_CODE) {
       addTableData.value = res.data
     }
@@ -77,7 +77,7 @@ const fetchAddTableInfo = async () => {
 const show = (type) => {
   modalType.value = type
   showModal.value = true
-  fetchAddTableInfo()
+  // fetchAddTableInfo()
 }
 
 const confirm = async () => {
@@ -137,6 +137,7 @@ const addColumns = [
 
 const closeModal = () => {
   addTableData.value = []
+  checkedAddTableRowKeys.value = []
 }
 
 const search = (val) => {

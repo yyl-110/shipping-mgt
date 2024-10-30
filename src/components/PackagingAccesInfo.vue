@@ -54,10 +54,11 @@ import { ShowOrEdit } from './tool'
 import AddPackageModal from './common/AddPackageModal.vue'
 import useRefreshPage from '../hooks/useRefreshPage'
 import { useAppStore } from '../store'
+import _ from 'lodash-es'
 
 const { handleDelete } = useHandle()
 
-const { updateAccessories } = useAppStore()
+const { updateAccessories, updatePackagingAccesInfoState } = useAppStore()
 
 const rowKey = (row) => row.materialNumber
 /* 表格 */
@@ -280,6 +281,10 @@ watch(
       return acc + val
     }, 0)
     updateAccessories(total)
+    const state = tableData.value.every(
+      (item) => _.isNumber(item.quantity) && _.isNumber(item.unitPrice)
+    )
+    updatePackagingAccesInfoState(state)
   },
   { deep: true }
 )

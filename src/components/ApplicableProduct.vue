@@ -32,7 +32,7 @@
       />
     </div>
   </app-box>
-  <n-modal v-model:show="showModal" :mask-closable="false">
+  <n-modal v-model:show="showModal" :mask-closable="false" @after-leave="closeModal">
     <div w-1100 rounded-4 bg-white>
       <header h-40 flex items-center flex-justify-between px-20>
         <div flex items-center>
@@ -122,7 +122,7 @@ const fetchTableInfo = async () => {
 const fetchAddTableInfo = async () => {
   try {
     addTableLoading.value = true
-    const res = await queryApplicableProductsData({ ...formValue })
+    const res = await queryApplicableProductsData({ ...formValue, oid: window.oid })
     if (res.code === RES_SUCCESS_CODE) {
       addTableData.value = res.data
     }
@@ -216,7 +216,7 @@ const handleClick = async (item) => {
   switch (item.key) {
     case 1: // 新增
       showModal.value = true
-      fetchAddTableInfo()
+      // fetchAddTableInfo()
       break
     case 2: // 删除
       try {
@@ -296,6 +296,11 @@ const confirm = async () => {
   } finally {
     saveAddTableLoading.value = false
   }
+}
+
+const closeModal = () => {
+  addTableData.value = []
+  checkedAddTableRowKeys.value = []
 }
 
 onMounted(() => {
