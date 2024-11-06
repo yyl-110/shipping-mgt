@@ -56,7 +56,7 @@
               <PackagingAccesInfo :ref="setRef" />
               <MaterialPacking :ref="setRef" />
               <LoadingPlan :ref="setRef" />
-              <!-- <Enclosure :ref="setRef" /> -->
+              <Enclosure :ref="setRef" />
             </n-spin>
           </div>
         </n-layout-content>
@@ -93,7 +93,7 @@ const handleScroll = (e) => {
 }
 
 const setRef = (el) => {
-  if (navWrapper.value.length === 7) {
+  if (navWrapper.value.length === 8) {
     return
   }
   navWrapper.value.push(el)
@@ -130,6 +130,7 @@ const batchExport = async () => {
     const res = await batchExportExcel({ oid: window.oid })
     if (res.code === RES_SUCCESS_CODE) {
       $message.success('导出成功')
+      window.open(res?.data?.fileUrl)
     }
   } catch (error) {
     console.log('error:', error)

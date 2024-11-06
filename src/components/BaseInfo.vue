@@ -202,7 +202,7 @@ watch(
   () => {
     try {
       formValue.value.eachCost = Number(
-        (formValue.value.totalCost / formValue.value.shippingQuantity).toFixed(3)
+        ((formValue.value.totalCost || 0) / (formValue.value.shippingQuantity || 0)).toFixed(3)
       )
     } catch (error) {
       console.log('error:', error)

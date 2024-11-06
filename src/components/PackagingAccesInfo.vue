@@ -282,7 +282,7 @@ watch(
     }, 0)
     updateAccessories(total)
     const state = tableData.value.every(
-      (item) => _.isNumber(item.quantity) && _.isNumber(item.unitPrice)
+      (item) => (item.quantity || item.quantity === 0) && (item.unitPrice || item.unitPrice === 0)
     )
     updatePackagingAccesInfoState(state)
   },

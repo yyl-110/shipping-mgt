@@ -55,7 +55,7 @@ const columns = [
   {
     title: '序号',
     key: 'no',
-    width: '100',
+    width: 200,
     align: 'center',
     render(row, inx) {
       return inx + 1
@@ -65,10 +65,10 @@ const columns = [
     title: '文件名',
     key: 'attachmentName',
   },
-  {
-    title: '附件说明',
-    key: 'attachmentDesc',
-  },
+  // {
+  //   title: '附件说明',
+  //   key: 'attachmentDesc',
+  // },
   {
     title: '操作',
     key: 'actions',

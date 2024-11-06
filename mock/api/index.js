@@ -174,7 +174,7 @@ export default [
       return {
         message: 'ok',
         code: '200',
-        'data|10': [
+        'data|2': [
           {
             materialNumber: () => Random.id(),
             materialDesc: () => Random.ctitle(10, 20),
@@ -245,18 +245,7 @@ export default [
       return {
         message: 'ok',
         code: '200',
-        'data|10': [
-          {
-            materialNumber: () => Random.id(),
-            materialDesc: () => Random.ctitle(10, 20),
-            'length|+1': 20,
-            'width|+1': 20,
-            'height|1-200': 2,
-            'weight|1-200': 2,
-            'unitPrice|+1': 10,
-            'quantity|+1': 10,
-          },
-        ],
+        data: [],
       }
     },
   },
@@ -372,7 +361,7 @@ export default [
                 materialNumber: () => Random.id(),
                 materialDesc: () => Random.ctitle(10, 20),
                 englishDesc: () => Random.ctitle(10, 20),
-                'quantity|+1': 10,
+                quantity: '10',
                 'length|+1': 20,
                 'width|+1': 20,
                 'height|1-200': 2,

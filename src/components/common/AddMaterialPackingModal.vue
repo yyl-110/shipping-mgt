@@ -458,10 +458,10 @@ watch(
   () => detailedTableData.value,
   () => {
     const weight = detailedTableData.value.reduce((pre, cut) => {
-      return pre + (cut?.weight || 0)
+      return pre + Number(cut?.weight || 0)
     }, 0)
     const totalWeight = detailedTableData.value.reduce((pre, cut) => {
-      return pre + (cut?.totalWeight || 0)
+      return pre + Number(cut?.totalWeight || 0)
     }, 0)
     addTableData.value[0].netWeight = weight // 净重
     addTableData.value[0].grossWeight = totalWeight // 毛重

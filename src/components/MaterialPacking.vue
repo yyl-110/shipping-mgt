@@ -218,7 +218,7 @@ const detailedTableColumns = (inx) => [
             mainTableInfo.value[inx].grossWeight = mainTableInfo.value[
               inx
             ].shippingMaterialItems.reduce((pre, cut) => {
-              return pre + (cut?.totalWeight || 0)
+              return pre + Number(cut?.totalWeight || 0)
             }, 0)
           } catch (error) {
             console.log('error:', error)
@@ -288,7 +288,7 @@ const detailedTableColumns = (inx) => [
             mainTableInfo.value[inx].netWeight = mainTableInfo.value[
               inx
             ].shippingMaterialItems.reduce((pre, cut) => {
-              return pre + (cut?.weight || 0)
+              return pre + Number(cut?.weight || 0)
             }, 0)
             /* 更新总重 */
             mainTableInfo.value[inx].shippingMaterialItems[index].totalWeight =
@@ -298,7 +298,7 @@ const detailedTableColumns = (inx) => [
             mainTableInfo.value[inx].grossWeight = mainTableInfo.value[
               inx
             ].shippingMaterialItems.reduce((pre, cut) => {
-              return pre + (cut?.totalWeight || 0)
+              return pre + Number(cut?.totalWeight || 0)
             }, 0)
           } catch (error) {
             console.log('error:', error)
@@ -323,7 +323,7 @@ const fetchData = async () => {
   try {
     loading.value = true
     const res = await getAllShippingPartsData({ oid: window.oid })
-    mainTableInfo.value = res.data
+    mainTableInfo.value = [...(res.data || [])]
   } catch (error) {
     console.log('error:', error)
   } finally {
